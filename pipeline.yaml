@@ -6,10 +6,38 @@ resources:
   source:
     repository: hopetembhum/test1
     tag: "latest"
-
+    username: ((registry-username))
+    password: ((registry-password))
+- name: concoursegit
+  type: git
+  icon: github
+  source:
+    uri: https://github.com/Tembhum/concoursedemo.git
+    branch: master
 
 jobs:
-- name: deploy
+- name: build-and-push
   plan:
-  - get: image
+  - get: concoursegit
     trigger: true
+  - task: build-image
+    privileged: true
+    config:
+      platform: linux
+      image_resource:
+        type: registry-image
+        source:
+          # Check out the README for oci-build-task at
+          # https://github.com/vito/oci-build-task
+          repository: vito/oci-build-task
+      inputs:
+      - name: concoursegit
+      outputs:
+      - name: image
+      params:
+        CONTEXT: concoursegit/
+      run:
+        path: build
+  - put: simple-image
+    params:
+      image: image/image.tar
