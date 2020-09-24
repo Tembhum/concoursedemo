@@ -1,0 +1,15 @@
+---
+resources:
+- name: image
+  type: registry-image
+  icon: docker
+  source:
+    repository: hopetembhum/test1
+    tag: "latest"
+
+
+jobs:
+- name: deploy
+  plan:
+  - get: image
+    trigger: true
