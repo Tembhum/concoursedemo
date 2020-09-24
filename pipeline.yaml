@@ -6,7 +6,7 @@ resources:
   source:
     repository: hopetembhum/test1
     tag: "latest"
-    username: ((registry-username))
+    username: hopetembhum
     password: ((registry-password))
 - name: concoursegit
   type: git
@@ -38,6 +38,6 @@ jobs:
         CONTEXT: concoursegit/
       run:
         path: build
-  - put: simple-image
+  - put: image
     params:
       image: image/image.tar
