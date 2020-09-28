@@ -8,6 +8,7 @@ resource_types:
 resources:
 - name: concoursegit
   type: git
+  check_every: 1m
   icon: github
   source:
     uri: https://github.com/Tembhum/concoursedemo.git
