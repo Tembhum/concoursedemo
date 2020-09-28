@@ -6,20 +6,21 @@ resource_types:
     tag: "1.16"
 
 resources:
-- name: gitrepo
+- name: concoursegit
   type: git
   icon: github
   source:
     uri: https://github.com/Tembhum/concoursedemo.git
     branch: master
 
-- name: web-docker-image
+- name: simple-image
   type: docker-image
   source:
     email: tembhum.ch@gmail.com
     username: hopetembhum
     password: 123456789
     repository: hopetembhum/test1
+    tag: "latest"
 
 - name: k8s
   type: kubernetes
@@ -49,11 +50,6 @@ resources:
               client-certificate-data: REDACTED
               client-key-data: REDACTED
 
-- name: my-timer
-  type: time
-  source:
-    interval: 2m
-
 jobs:
 - name: build-and-push
   plan:
@@ -77,7 +73,7 @@ jobs:
         CONTEXT: concoursegit/
       run:
         path: build
-  - put: image
+  - put: simple-image
     params:
       image: image/image.tar
 
@@ -85,10 +81,9 @@ jobs:
 - name: "Deploy Application"
   public: false
   plan:
-    - get: web-docker-image
+    - get: simple-image
       trigger: true
-      passed:
-        - "Docker-Build"
+      passed: [build-and-push]
     - put: k8s
       params:
         kubectl: delete pods -l run=demo
