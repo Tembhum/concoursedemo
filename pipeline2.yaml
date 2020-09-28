@@ -18,7 +18,7 @@ resources:
   source:
     email: tembhum.ch@gmail.com
     username: hopetembhum
-    password: 123456789
+    password: "123456789"
     repository: hopetembhum/test1
     tag: "latest"
 
@@ -51,31 +51,40 @@ resources:
               client-key-data: REDACTED
 
 jobs:
-- name: build-and-push
+- name: publish
+  public: true
+  serial: true
   plan:
   - get: concoursegit
-    trigger: true
-  - task: build-image
-    privileged: true
-    config:
-      platform: linux
-      image_resource:
-        type: registry-image
-        source:
-          # Check out the README for oci-build-task at
-          # https://github.com/vito/oci-build-task
-          repository: vito/oci-build-task
-      inputs:
-      - name: concoursegit
-      outputs:
-      - name: image
-      params:
-        CONTEXT: concoursegit/
-      run:
-        path: build
   - put: simple-image
     params:
-      image: image/image.tar
+      build: concoursegit
+# jobs:
+# - name: build-and-push
+#   plan:
+#   - get: concoursegit
+#     trigger: true
+#   - task: build-image
+#     privileged: true
+#     config:
+#       platform: linux
+#       image_resource:
+#         type: registry-image
+#         source:
+#           # Check out the README for oci-build-task at
+#           # https://github.com/vito/oci-build-task
+#           repository: vito/oci-build-task
+#       inputs:
+#       - name: concoursegit
+#       outputs:
+#       - name: image
+#       params:
+#         CONTEXT: concoursegit/
+#       run:
+#         path: build
+#   - put: simple-image
+#     params:
+#       image: image/image.tar
 
 
 - name: "Deploy Application"
@@ -83,7 +92,7 @@ jobs:
   plan:
     - get: simple-image
       trigger: true
-      passed: [build-and-push]
+      passed: [publish]
     - put: k8s
       params:
         kubectl: delete pods -l run=demo
