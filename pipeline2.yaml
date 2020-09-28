@@ -1,0 +1,95 @@
+resource_types:
+- name: kubernetes
+  type: docker-image
+  source:
+    repository: zlabjp/kubernetes-resource
+    tag: "1.16"
+
+resources:
+- name: gitrepo
+  type: git
+  icon: github
+  source:
+    uri: https://github.com/Tembhum/concoursedemo.git
+    branch: master
+
+- name: web-docker-image
+  type: docker-image
+  source:
+    email: tembhum.ch@gmail.com
+    username: hopetembhum
+    password: 123456789
+    repository: hopetembhum/test1
+
+- name: k8s
+  type: kubernetes
+  source:
+    kubeconfig: |
+          apiVersion: v1
+          clusters:
+          - cluster:
+              certificate-authority-data: DATA+OMITTED
+              server: https://kubernetes.docker.internal:6443
+            name: docker-desktop
+          contexts:
+          - context:
+              cluster: docker-desktop
+              user: docker-desktop
+            name: docker-desktop
+          - context:
+              cluster: docker-desktop
+              user: docker-desktop
+            name: docker-for-desktop
+          current-context: docker-desktop
+          kind: Config
+          preferences: {}
+          users:
+          - name: docker-desktop
+            user:
+              client-certificate-data: REDACTED
+              client-key-data: REDACTED
+
+- name: my-timer
+  type: time
+  source:
+    interval: 2m
+
+jobs:
+- name: build-and-push
+  plan:
+  - get: concoursegit
+    trigger: true
+  - task: build-image
+    privileged: true
+    config:
+      platform: linux
+      image_resource:
+        type: registry-image
+        source:
+          # Check out the README for oci-build-task at
+          # https://github.com/vito/oci-build-task
+          repository: vito/oci-build-task
+      inputs:
+      - name: concoursegit
+      outputs:
+      - name: image
+      params:
+        CONTEXT: concoursegit/
+      run:
+        path: build
+  - put: image
+    params:
+      image: image/image.tar
+
+
+- name: "Deploy Application"
+  public: false
+  plan:
+    - get: web-docker-image
+      trigger: true
+      passed:
+        - "Docker-Build"
+    - put: k8s
+      params:
+        kubectl: delete pods -l run=demo
+        wait_until_ready: 300

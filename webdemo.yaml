@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hopewebdemo
+  labels:
+    app: test1
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: test1
+  template:
+    metadata:
+      labels:
+        app: test1
+    spec:
+      containers:
+      - name: test1
+        image: hopetembhum/test1:latest
+        ports:
+          - containerPort: 8080
