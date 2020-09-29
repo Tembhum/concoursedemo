@@ -1,0 +1,166 @@
+
+resource_types:
+
+- name: kubernetes
+  type: docker-image
+  source:
+    repository: zlabjp/kubernetes-resource
+    tag: "1.16"
+
+- name: slack-notification
+  type: docker-image
+  source:
+    repository: cfcommunity/slack-notification-resource
+    tag: latest
+
+- name: github-status
+  type: docker-image
+  source:
+    repository: dpb587/github-status-resource
+    tag: master
+
+#######################################################################
+
+resources:
+
+- name: concoursegit
+  type: git
+  check_every: 1m
+  icon: github
+  source:
+    uri: https://github.com/Tembhum/concoursedemo.git
+    branch: master
+
+- name: image
+  type: docker-image
+  source:
+    email: tembhum.ch@gmail.com
+    username: hopetembhum
+    password: "123456789"
+    repository: hopetembhum/test1
+    tag: "latest"
+
+- name: resource-slack-alert
+  type: slack-notification
+  source:
+    url: demo-x3f8639.slack.com
+
+- name: resource-repo-status 
+  type: github-status
+  source:
+    repository: tembhum/concoursedemo
+    access_token: 2619684df149ec8dc0b91f5a63762ff1202079b6
+
+# - name: k8s
+#   type: kubernetes
+#   source:
+#     kubeconfig: |
+#           apiVersion: v1
+#           clusters:
+#           - cluster:
+#               certificate-authority-data: DATA+OMITTED
+#               server: https://kubernetes.docker.internal:6443
+#             name: docker-desktop
+#           contexts:
+#           - context:
+#               cluster: docker-desktop
+#               user: docker-desktop
+#             name: docker-desktop
+#           - context:
+#               cluster: docker-desktop
+#               user: docker-desktop
+#             name: docker-for-desktop
+#           current-context: docker-desktop
+#           kind: Config
+#           preferences: {}
+#           users:
+#           - name: docker-desktop
+#             user:
+#               client-certificate-data: REDACTED
+#               client-key-data: REDACTED
+
+####################################################################
+
+jobs:
+
+- name: readme-github-pages
+  plan:
+  - get: concoursegit
+    trigger: true
+  - put: resource-slack-alert
+    params:
+      channel: '#demo'
+      text: "From webdemo: STARTED job-readme-github-pages in concourse ci."
+  - put: resource-repo-status
+    params: { state: "pending", description: "STARTED job-readme-github-pages in concourse ci.", commit: "concoursegit" }
+  - task: task-readme-github-pages
+    file: concoursegit/tasks/task-readme.yml
+    on_success:
+      do:
+      - put: concoursegit
+        params:
+          repository: my-python-examples-updated  
+      - put: resource-slack-alert
+        params:
+          channel: '#demo'
+          text: "From my-python-examples: PASSED job-readme-github-pages in concourse ci."
+      - put: resource-repo-status
+        params: { state: "success", description: "PASSED job-readme-github-pages in concourse ci", commit: "concoursegit" }
+    on_failure:
+      do:
+      - put: resource-slack-alert
+        params:
+          channel: '#demo'
+          text: "From my-python-examples: FAILED job-readme-github-pages in concourse ci."
+      - put: resource-repo-status
+        params: { state: "failure", description: "FAILED job-readme-github-pages in concourse ci", commit: "concoursegit" }
+
+
+
+- name: publish
+  public: true
+  serial: true
+  plan:
+  - get: concoursegit
+  - put: image
+    params:
+      build: concoursegit
+
+# jobs:
+# - name: build-and-push
+#   plan:
+#   - get: concoursegit
+#     trigger: true
+#   - task: build-image
+#     privileged: true
+#     config:
+#       platform: linux
+#       image_resource:
+#         type: registry-image
+#         source:
+#           # Check out the README for oci-build-task at
+#           # https://github.com/vito/oci-build-task
+#           repository: vito/oci-build-task
+#       inputs:
+#       - name: concoursegit
+#       outputs:
+#       - name: image
+#       params:
+#         CONTEXT: concoursegit/
+#       run:
+#         path: build
+#   - put: simple-image
+#     params:
+#       image: image/image.tar
+
+
+# - name: "Deploy Application"
+#   public: false
+#   plan:
+#     - get: simple-image
+#       trigger: true
+#       passed: [publish]
+#     - put: k8s
+#       params:
+#         kubectl: delete pods -l run=demo
+#         wait_until_ready: 300

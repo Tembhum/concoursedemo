@@ -1,0 +1,19 @@
+# my-python-examples task-readme-github-pages.yml
+
+platform: linux
+
+image_resource:
+  type: docker-image
+  source:
+    repository: golang
+    tag: 1.7.1
+
+inputs:
+- name: concoursegit
+
+outputs:
+- name: my-python-examples-updated
+
+run:
+  path: ./scripts/readme.sh
+  # args: [-debug]
