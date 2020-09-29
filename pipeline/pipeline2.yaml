@@ -43,7 +43,7 @@ resources:
 - name: resource-slack-alert
   type: slack-notification
   source:
-    url: https://demo-x3f8639.slack.com/
+    url: https://hooks.slack.com/services/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
 
 - name: resource-repo-status 
   type: github-status
