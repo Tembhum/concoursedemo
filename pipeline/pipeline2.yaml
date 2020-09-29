@@ -44,11 +44,11 @@ resources:
   source:
     url: https://hooks.slack.com/services/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
 
-- name: resource-repo-status 
-  type: github-status
-  source:
-    repository: tembhum/concoursedemo
-    access_token: 2619684df149ec8dc0b91f5a63762ff1202079b6
+# - name: resource-repo-status 
+#   type: github-status
+#   source:
+#     repository: tembhum/concoursedemo
+#     access_token: 2619684df149ec8dc0b91f5a63762ff1202079b6
 
 # - name: k8s
 #   type: kubernetes
@@ -91,27 +91,27 @@ jobs:
       text: "From webdemo: STARTED job-readme-github-pages in concourse ci."
   # - put: resource-repo-status
   #   params: { state: "pending", description: "STARTED job-readme-github-pages in concourse ci.", commit: "concoursegit" }
-  - task: task-readme-github-pages
-    file: concoursegit/tasks/task-readme.yml
-    on_success:
-      do:
-      - put: concoursegit
-        params:
-          repository: my-python-examples-updated  
-      - put: resource-slack-alert
-        params:
-          channel: '#demo'
-          text: "From my-python-examples: PASSED job-readme-github-pages in concourse ci."
-      - put: resource-repo-status
-        params: { state: "success", description: "PASSED job-readme-github-pages in concourse ci", commit: "concoursegit" }
-    on_failure:
-      do:
-      - put: resource-slack-alert
-        params:
-          channel: '#demo'
-          text: "From my-python-examples: FAILED job-readme-github-pages in concourse ci."
-      - put: resource-repo-status
-        params: { state: "failure", description: "FAILED job-readme-github-pages in concourse ci", commit: "concoursegit" }
+  # - task: task-readme-github-pages
+  #   file: concoursegit/tasks/task-readme.yml
+  #   on_success:
+  #     do:
+  #     - put: concoursegit
+  #       params:
+  #         repository: my-python-examples-updated  
+  #     - put: resource-slack-alert
+  #       params:
+  #         channel: '#demo'
+  #         text: "From my-python-examples: PASSED job-readme-github-pages in concourse ci."
+  #     - put: resource-repo-status
+  #       params: { state: "success", description: "PASSED job-readme-github-pages in concourse ci", commit: "concoursegit" }
+  #   on_failure:
+  #     do:
+  #     - put: resource-slack-alert
+  #       params:
+  #         channel: '#demo'
+  #         text: "From my-python-examples: FAILED job-readme-github-pages in concourse ci."
+  #     - put: resource-repo-status
+  #       params: { state: "failure", description: "FAILED job-readme-github-pages in concourse ci", commit: "concoursegit" }
 
 
 
