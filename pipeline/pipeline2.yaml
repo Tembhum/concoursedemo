@@ -11,7 +11,6 @@ resource_types:
   type: docker-image
   source:
     repository: cfcommunity/slack-notification-resource
-    tag: latest
 
 - name: github-status
   type: docker-image
@@ -43,7 +42,7 @@ resources:
 - name: resource-slack-alert
   type: slack-notification
   source:
-    url: https://hooks.slack.com/services/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
+    url: https://hooks.slack.com/services/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
 
 - name: resource-repo-status 
   type: github-status
@@ -89,10 +88,9 @@ jobs:
     trigger: true
   - put: resource-slack-alert
     params:
-      channel: '#demo'
       text: "From webdemo: STARTED job-readme-github-pages in concourse ci."
-  - put: resource-repo-status
-    params: { state: "pending", description: "STARTED job-readme-github-pages in concourse ci.", commit: "concoursegit" }
+  # - put: resource-repo-status
+  #   params: { state: "pending", description: "STARTED job-readme-github-pages in concourse ci.", commit: "concoursegit" }
   - task: task-readme-github-pages
     file: concoursegit/tasks/task-readme.yml
     on_success:
