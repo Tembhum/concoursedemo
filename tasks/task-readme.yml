@@ -14,5 +14,5 @@ outputs:
 - name: my-python-examples-updated
 
 run:
-  path: ./bin/sh
+  path: ./concoursegit/scripts
   args: ["./readme.sh"]
