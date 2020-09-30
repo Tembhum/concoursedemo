@@ -13,6 +13,7 @@ inputs:
 outputs:
 - name: my-python-examples-updated
 
+
 run:
-  path: ./concoursegit/scripts
-  args: ["./readme.sh"]
+  path: bash
+  args: ["./concoursegit/scripts/readme.sh"]
