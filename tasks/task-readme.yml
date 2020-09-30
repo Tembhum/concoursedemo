@@ -5,8 +5,8 @@ platform: linux
 image_resource:
   type: docker-image
   source:
-    repository: go
-
+    repository: golang
+    tag: 1.7.1
 inputs:
 - name: concoursegit
 
@@ -14,4 +14,4 @@ outputs:
 - name: my-python-examples-updated
 
 run:
-  path: concoursegit/scripts/readme.sh
+  path: ./concoursegit/scripts/readme.sh
