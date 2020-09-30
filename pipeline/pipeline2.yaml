@@ -44,6 +44,11 @@ resources:
   source:
     url: https://hooks.slack.com/services/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
 
+- name: k8s
+  type: kubernetes
+  source:
+    kubeconfig: ((k8s-kubeconfig))
+
 # - name: resource-repo-status 
 #   type: github-status
 #   source:
@@ -82,7 +87,7 @@ resources:
 
 jobs:
 
-- name: update readme
+- name: updatereadme
   plan:
   - get: concoursegit
     trigger: true
@@ -121,12 +126,12 @@ jobs:
   plan:
   - get: concoursegit
     trigger: true
-    passed: [update readme]
+    # passed: [update readme]
   - put: image
     params:
       build: concoursegit
 
-# jobs:
+
 # - name: build-and-push
 #   plan:
 #   - get: concoursegit
@@ -149,18 +154,18 @@ jobs:
 #         CONTEXT: concoursegit/
 #       run:
 #         path: build
-#   - put: simple-image
+#   - put: image
 #     params:
 #       image: image/image.tar
 
 
-# - name: "Deploy Application"
-#   public: false
-#   plan:
-#     - get: simple-image
-#       trigger: true
-#       passed: [publish]
-#     - put: k8s
-#       params:
-#         kubectl: delete pods -l run=demo
-#         wait_until_ready: 300
+- name: deploy
+  public: false
+  plan:
+    - get: image
+      trigger: true
+      passed: [publish]
+    - put: k8s
+      params:
+        kubectl: delete pods -l run=demo
+        wait_until_ready: 300
